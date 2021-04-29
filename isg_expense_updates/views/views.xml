@@ -1,0 +1,71 @@
+<odoo>
+  <data>
+
+ <record id="view_hr_expense_sheet_form" model="ir.ui.view">
+            <field name="name">hr.expense.sheet.form</field>
+            <field name="model">hr.expense.sheet</field>
+            <field name="inherit_id" ref="hr_expense.view_hr_expense_sheet_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='approve_expense_sheets']" position="replace">
+                    <button name="approve_expense_sheets"  attrs="{'invisible': [('can_approve', '=', False)]}" string="Approve" type="object"  class="oe_highlight o_expense_sheet_approve"/>
+                </xpath>
+                <xpath expr="//button[@name='action_sheet_move_create']" position="replace">
+                    <button name="action_sheet_move_create" states="approve" string="Post Journal Entries" type="object" groups="hr_expense.group_hr_expense_manager" class="oe_highlight o_expense_sheet_post"/>
+                </xpath>
+                <xpath expr="//field[@name='department_id']" position="replace">
+                            <field name="department_id" attrs="{'readonly': [('department_id', '!=', False)]}"/>
+                </xpath>
+                <xpath expr="//field[@name='employee_id']" position="replace">
+                            <field name="employee_id" attrs="{'readonly': [('employee_id', '!=', False)]}"/>
+                </xpath>
+                <xpath expr="//field[@name='user_id']" position="replace">
+                            <field name="user_id" attrs="{'readonly': [('user_id', '!=', False)]}"/>
+                            <field name="can_approve" invisible="1"/>
+                </xpath>
+            </field>
+        </record>
+
+      <record id="hr_expense_view_form" model="ir.ui.view">
+            <field name="name">hr.expense.form</field>
+            <field name="model">hr.expense</field>
+            <field name="inherit_id" ref="hr_expense.hr_expense_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='employee_id']" position="replace">
+                            <field name="employee_id" />
+                </xpath>
+                <xpath expr="//field[@name='analytic_account_id']" position="replace">
+                            <field name="analytic_account_id" groups="hr_expense.group_hr_expense_user"/>
+                </xpath>
+                <xpath expr="//field[@name='analytic_tag_ids']" position="replace">
+                            <field name="analytic_tag_ids" widget="many2many_tags" groups="hr_expense.group_hr_expense_user"/>
+                </xpath>
+
+            </field>
+        </record>
+
+ <record id="hr_expense.action_hr_expense_sheet_my_all" model="ir.actions.act_window">
+            <field name="name">My Expense Reports</field>
+            <field name="res_model">hr.expense.sheet</field>
+            <field name="view_mode">tree,kanban,form,pivot,graph,activity</field>
+            <field name="search_view_id" ref="hr_expense.view_hr_expense_sheet_filter"/>
+            <field name="domain">['|','|',('user_id', '=', uid),('create_uid', '=', uid),('employee_id.user_id', '=', uid), ('state', '!=', 'cancel')]</field>
+            <field name="context">{'search_default_my_reports': 1}</field>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                Create a new expense report
+              </p><p>
+                Once you have created your expense, submit it to your manager who will validate it.
+              </p>
+            </field>
+        </record>
+
+      <menuitem id="hr_expense.menu_hr_expense_sheet_all_to_post" name="To Post" sequence="2" parent="hr_expense.menu_hr_expense_report"
+            action="hr_expense.action_hr_expense_sheet_all_to_post" groups="account.group_account_user,hr_expense.group_hr_expense_manager"/>
+   <record id="hr_expense.ir_rule_hr_expense_employee" model="ir.rule">
+            <field name="name">Employee Expense</field>
+            <field name="model_id" ref="hr_expense.model_hr_expense"/>
+            <field name="domain_force">['|','|',('employee_id.user_id', '=', user.id),('create_uid', '=', user.id),('employee_id.parent_id.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+  </data>
+</odoo>
