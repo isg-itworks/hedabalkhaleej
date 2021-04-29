@@ -34,7 +34,7 @@ class IsgExpenseUpdatesSheet(models.Model):
     _inherit = 'hr.expense.sheet'
     department_id = fields.Many2one('hr.department',store=True, string='Department',compute='_onchange_employee_id', states={'post': [('readonly', True)], 'done': [('readonly', True)]})
     user_id = fields.Many2one('res.users', 'Manager',store=True,  readonly=True,compute='_onchange_employee_id', copy=False, states={'draft': [('readonly', False)]}, track_visibility='onchange', oldname='responsible_id')
-    expense_line_ids = fields.One2many('hr.expense', 'sheet_id', string='Expense Lines', states={'approve': [('readonly', False)], 'done': [('readonly', True)], 'post': [('readonly', True)]}, copy=False)
+    expense_line_ids = fields.One2many('hr.expense', 'sheet_id', string='Expense Lines', domain="[('employee_id', '=', [employee_id])]", states={'approve': [('readonly', False)], 'done': [('readonly', True)], 'post': [('readonly', True)]}, copy=False)
     can_approve = fields.Boolean(compute='compute_can_approve')
 
     def compute_can_approve(self):
@@ -44,6 +44,10 @@ class IsgExpenseUpdatesSheet(models.Model):
             else :
                 record.can_approve= False
 
+    @api.multi
+    def approve_expense_sheets(self):
+        self.write({'state': 'approve'})
+        self.activity_update()
 
     @api.multi
     def action_sheet_move_create(self):
