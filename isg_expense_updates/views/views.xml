@@ -7,7 +7,7 @@
             <field name="inherit_id" ref="hr_expense.view_hr_expense_sheet_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='expense_line_ids']" position="attributes">
-                                    <attribute name="domain">[('employee_id', '=', [employee_id]),('state', '=', 'draft')]</attribute>
+                                    <attribute name="domain">"[('employee_id', '=', employee_id),('state', '=', 'draft')]"</attribute>
 
                 </xpath>
                 <xpath expr="//button[@name='approve_expense_sheets']" position="replace">
