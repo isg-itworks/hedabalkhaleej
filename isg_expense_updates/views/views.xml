@@ -10,12 +10,18 @@
                                     <attribute name="domain">"[('employee_id', '=', employee_id),('state', '=', 'draft')]"</attribute>
 
                 </xpath>
+
+                <xpath expr="//field[@name='state']" position="replace">
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submit,pending,approve,post,done"/>
+                </xpath>
                 <xpath expr="//button[@name='approve_expense_sheets']" position="replace">
-                    <button name="approve_expense_sheets"  attrs="{'invisible': [('can_approve', '=', False)]}" string="Approve" type="object"  class="oe_highlight o_expense_sheet_approve"/>
+                    <button name="confirm_expense_sheets"  attrs="{'invisible': [('can_approve', '=', False)]}" string="Confirm" type="object"  class="oe_highlight o_expense_sheet_approve"/>
+                    <button name="approve_expense_sheets" states="pending"  groups="hr_expense.group_hr_expense_manager" string="Approve" type="object"  class="oe_highlight o_expense_sheet_approve"/>
                 </xpath>
-                <xpath expr="//button[@name='action_sheet_move_create']" position="replace">
-                    <button name="action_sheet_move_create" states="approve" string="Post Journal Entries" type="object" groups="hr_expense.group_hr_expense_manager" class="oe_highlight o_expense_sheet_post"/>
+                <xpath expr="//button[@name='%(hr_expense.hr_expense_refuse_wizard_action)d']" position="replace">
+                    <button name="%(hr_expense.hr_expense_refuse_wizard_action)d" states="submit,pending" context="{'hr_expense_refuse_model':'hr.expense.sheet'}" string="Refuse" type="action" groups="hr_expense.group_hr_expense_manager" />
                 </xpath>
+
                 <xpath expr="//field[@name='department_id']" position="replace">
                             <field name="department_id" attrs="{'readonly': [('department_id', '!=', False)]}"/>
                 </xpath>
@@ -34,19 +40,35 @@
             <field name="model">hr.expense</field>
             <field name="inherit_id" ref="hr_expense.hr_expense_view_form"/>
             <field name="arch" type="xml">
+                <xpath expr="//field[@name='state']" position="replace">
+                  <field name="state" widget="statusbar" statusbar_visible="draft,reported,pending,approved,done,refused"/>
+                </xpath>
                 <xpath expr="//field[@name='employee_id']" position="replace">
                             <field name="employee_id" />
                 </xpath>
                 <xpath expr="//field[@name='analytic_account_id']" position="replace">
-                            <field name="analytic_account_id" groups="hr_expense.group_hr_expense_user"/>
+                            <field name="analytic_account_id"  groups="account.group_account_user"/>
                 </xpath>
                 <xpath expr="//field[@name='analytic_tag_ids']" position="replace">
-                            <field name="analytic_tag_ids" widget="many2many_tags" groups="hr_expense.group_hr_expense_user"/>
+                            <field name="analytic_tag_ids" widget="many2many_tags"  groups="account.group_account_user"/>
                 </xpath>
 
             </field>
         </record>
 
+      <record id="hr_expense_view_form" model="ir.ui.view">
+            <field name="name">hr.expense.search</field>
+            <field name="model">hr.expense.sheet</field>
+            <field name="inherit_id" ref="hr_expense.view_hr_expense_sheet_filter"/>
+            <field name="arch" type="xml">
+                <xpath expr="//filter[@name='submitted']" position="replace">
+                    <filter domain="[('state', '=', 'pending')]" string="To Approve" name="pending" help="Confirmed Expenses"/>
+                    <filter domain="[('state', '=', 'submitted')]" string="To Confirm" name="submitted" help="Confirmed Expenses"/>
+                </xpath>
+
+
+            </field>
+        </record>
  <record id="hr_expense.action_hr_expense_sheet_my_all" model="ir.actions.act_window">
             <field name="name">My Expense Reports</field>
             <field name="res_model">hr.expense.sheet</field>
@@ -63,8 +85,7 @@
             </field>
         </record>
 
-      <menuitem id="hr_expense.menu_hr_expense_sheet_all_to_post" name="To Post" sequence="2" parent="hr_expense.menu_hr_expense_report"
-            action="hr_expense.action_hr_expense_sheet_all_to_post" groups="account.group_account_user,hr_expense.group_hr_expense_manager"/>
+
    <record id="hr_expense.ir_rule_hr_expense_employee" model="ir.rule">
             <field name="name">Employee Expense</field>
             <field name="model_id" ref="hr_expense.model_hr_expense"/>
@@ -78,8 +99,22 @@
             <field name="groups" eval="[(4, ref('base.group_user'))]"/>
         </record>
               <menuitem id="hr_expense.menu_hr_expense_report" name="Expense Reports" sequence="2" parent="hr_expense.menu_hr_expense_root" groups="base.group_user"/>
-<record id="hr_expense.action_hr_expense_sheet_all_to_approve" model="ir.actions.act_window">
+
+      <record id="hr_expense.action_hr_expense_sheet_all_to_approve" model="ir.actions.act_window">
             <field name="name">Expense Reports to Approve</field>
+            <field name="res_model">hr.expense.sheet</field>
+            <field name="view_mode">tree,kanban,form,pivot,graph,activity</field>
+            <field name="search_view_id" ref="hr_expense.view_hr_expense_sheet_filter"/>
+            <field name="domain">[]</field>
+            <field name="context">{'search_default_pending': 1}</field>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_empty_folder">
+                No expense reports to approve
+              </p>
+            </field>
+        </record>
+      <record id="action_hr_expense_sheet_all_to_confirm" model="ir.actions.act_window">
+            <field name="name">Expense Reports to Confirm</field>
             <field name="res_model">hr.expense.sheet</field>
             <field name="view_mode">tree,kanban,form,pivot,graph,activity</field>
             <field name="search_view_id" ref="hr_expense.view_hr_expense_sheet_filter"/>
@@ -91,6 +126,10 @@
               </p>
             </field>
         </record>
+      <menuitem id="menu_hr_expense_sheet_all_to_confirm" name="To Confirm" sequence="1" parent="hr_expense.menu_hr_expense_report"
+            action="action_hr_expense_sheet_all_to_confirm"/>
+      <menuitem id="hr_expense.menu_hr_expense_sheet_all_to_approve" name="To Approve" sequence="2" parent="hr_expense.menu_hr_expense_report"
+            action="hr_expense.action_hr_expense_sheet_all_to_approve" groups="hr_expense.group_hr_expense_user"/>
   </data>
 
 </odoo>
