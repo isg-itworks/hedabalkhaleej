@@ -62,8 +62,8 @@
             <field name="inherit_id" ref="hr_expense.view_hr_expense_sheet_filter"/>
             <field name="arch" type="xml">
                 <xpath expr="//filter[@name='submitted']" position="replace">
-                    <filter domain="[('state', '=', 'pending')]" string="To Approve" name="pending" help="Confirmed Expenses"/>
-                    <filter domain="[('state', '=', 'submitted')]" string="To Confirm" name="submitted" help="Confirmed Expenses"/>
+                    <filter domain="[('state', '=', 'pending')]" string="To Approve" name="pending" help="Aprroved Expenses"/>
+                    <filter domain="[('state', '=', 'submit')]" string="To Confirm" name="submit" help="Confirmed Expenses"/>
                 </xpath>
 
 
@@ -119,7 +119,7 @@
             <field name="view_mode">tree,kanban,form,pivot,graph,activity</field>
             <field name="search_view_id" ref="hr_expense.view_hr_expense_sheet_filter"/>
             <field name="domain">[]</field>
-            <field name="context">{'search_default_submitted': 1}</field>
+            <field name="context">{'search_default_submit': 1}</field>
             <field name="help" type="html">
               <p class="o_view_nocontent_empty_folder">
                 No expense reports to approve
