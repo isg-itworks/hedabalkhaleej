@@ -48,6 +48,11 @@ msgid "To Confirm"
 msgstr "للتأكيد"
 
 #. module: hr_expense
+#: model_terms:ir.ui.view,arch_db:isg_expense_updates.view_hr_expense_sheet_form
+msgid "Confirm"
+msgstr "تأكيد"
+
+#. module: hr_expense
 #: model:ir.actions.act_window,name:isg_expense_updates.action_hr_expense_sheet_all_to_confirm
 msgid "Expense Reports to Confitm"
 msgstr "تقارير المصروفات المطلوب التأكيد عليها"
